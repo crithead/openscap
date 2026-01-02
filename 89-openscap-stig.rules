@@ -1,0 +1,7 @@
+# Architecture independent rules
+-e 2
+-f 2
+
+-w /usr/sbin/modprobe -p x -k modules
+-w /usr/sbin/rmmod -p x -k modules
+
