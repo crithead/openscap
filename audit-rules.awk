@@ -1,11 +1,12 @@
 #!/usr/bin/awk -f
 # File: audit-rules.awk
-# Usage: awk -f audit-rules.awk /etc/audit/rules.d/*.rules
 # Usage: awk -v A=TARGET1 [ -v B=TARGET2 ] [ -v C=TARGET3 ] \
-#                -f audit-rules.awk /etc/audit/rules.d/*.rules
+#            [ -v help=1 ] [ -v verbose=1 ] \
+#            -f audit-rules.awk /etc/audit/rules.d/*.rules
 
 function print_help() {
     print "Usage: awk -v A=TARGET1 [ -v B=TARGET2 ] [ -v C=TARGET3 ]"
+    print "    [ -v help=1 ] [ -v verbose=1 ]"
     print "    -f audit-rules.awk /etc/audit/rules.d/*.rules"
     print "Search for audit rules in the specified files with fields"
     print "matching targets A, and (optionally) B and (optionally) C."
@@ -28,11 +29,13 @@ BEGIN {
     target_count = 0
     lines = 0
     rule_count = 0
-    printf "--- Scanning auditd rules for:"
-    for (idx in targets) {
-        printf " %s", targets[idx]
+    if (verbose) {
+        printf "Scanning auditd rules for:"
+        for (idx in targets) {
+            printf " %s", targets[idx]
+        }
+        printf "\n"
     }
-    printf "\n"
 }
 
 # Bail out if there are no search targets.
@@ -64,7 +67,7 @@ BEGIN {
     }
     if ( matches == num_targets ) {
         target_count++
-        printf "Match on line %d\n", lines
+        if (verbose) printf "--- match on line %d\n", lines
     }
 
     # Clean the 'fields' array at the end of processing this line
@@ -78,8 +81,10 @@ BEGIN {
 }
 
 END {
-    printf "--- Rules monitoring %s: %d\n", targets[0], target_count
-    printf "--- Processed %d rules in %d lines\n", rule_count, lines
+    if (verbose) {
+        printf "Rules monitoring %s: %d\n", targets[0], target_count
+        printf "Processed %d rules in %d lines\n", rule_count, lines
+    }
     if ( target_count >= 1 )
         exit 0
     if ( target_count == 0 )
